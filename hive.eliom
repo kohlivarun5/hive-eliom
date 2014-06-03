@@ -47,16 +47,25 @@ let subscription_options () =
         div ~a:[a_class (["container"])] l
     )
 
+let make_page body = 
+    Html5.F.(
+       html
+         (Eliom_tools.Html5.head
+            ~title:"{Hive}"
+            ~css:([
+                "/static/bootstrap/css/bootstrap.min.css";
+                "/static/bootstrap/css/bootstrap-responsive.min.css";
+                "/static/main.css"
+                ]))
+         (body body))
+
 (* Registration of services *)
 let _ =
   Eliom_registration.Html5.register
     ~service:main_service
     (fun () () ->
       lwt cf = subscription_options () in
-      Lwt.return
-        (html (head (title (pcdata "")) [])
-              (body [h1 [pcdata "Hello"];
-                     cf])));
+      Lwt.return make_page ([h1 [pcdata "Hello"]; cf]);
 
   (*
   Eliom_registration.Any.register
