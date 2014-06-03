@@ -58,7 +58,19 @@ let make_page body' =
          css_link ~uri:(make_uri (Eliom_service.static_dir ())
 	        	  ["css";"bootstrap";"css";"bootstrap-responsive.min.css"]) ();
 	])
-     (body ((js_script ~uri:(make_uri (Eliom_service.static_dir ())                                                             
+     (body ~a:[a_style "background-color:#F1ECDE"]
+	   ((div ~a:[a_class ["navbar";"navbar-inverse";"navbar-fixed-top"]]
+	     [div ~a:[a_class ["navbar-inner"]]
+	      [div ~a:[a_class ["container"]]
+	       [
+	        (p ~a:[a_style "padding-right:1cm"; a_class ["brand"]]
+		   [(b [pcdata "{Hive}"]); (i [pcdata " : Your social hub!"]);]);
+	        (div [p ~a:[a_class ["brand";"navbar-form";"right"]] 
+	                [pcdata "Subscriptions"]]);
+	        (div [p [pcdata "Submit"]])
+               ]
+	      ]]) ::
+	    (js_script ~uri:(make_uri (Eliom_service.static_dir ())                                                             
 	        	  ["css";"bootstrap";"js";"bootstrap.min.js"]) ())
 	    ::body')))
 
@@ -68,4 +80,4 @@ let _ =
     ~service:main_service
     (fun () () ->
       lwt cf = subscription_options () in
-      Lwt.return (make_page [h1 [pcdata "Hello"]; cf]))
+      Lwt.return (make_page [cf]))
