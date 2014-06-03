@@ -6,9 +6,9 @@ let main_service = Eliom_service.Http.service ~path:[""] ~get_params:unit ()
 
 let user_service =
   Eliom_service.Http.service
-    ~path:["users"] ~get_params:(suffix (string "name")) ()
+    ~path:["subscriptions"] ~get_params:unit ()
 
-let connection_service =
+let oauth2_connection_service =
   Eliom_service.Http.post_service
     ~fallback:main_service
     ~post_params:(string "name" ** string "password")
@@ -16,80 +16,37 @@ let connection_service =
 
 let disconnection_service = Eliom_service.Http.post_coservice' ~post_params:unit ()
 
-let new_user_form_service = Eliom_service.Http.service ~path:["create account"] ~get_params:unit ()
-
-let account_confirmation_service =
-  Eliom_service.Http.post_coservice ~fallback:new_user_form_service ~post_params:(string "name" ** string "password") ()
-
-
-
-
-(* User names and passwords: *)
-let users = ref [("Calvin", "123"); ("Hobbes", "456")]
-
-let user_links () =
-  ul (List.map (fun (name, _) -> li [a ~service:user_service [pcdata name] name]) !users)
-
-let check_pwd name pwd = try List.assoc name !users = pwd with Not_found -> false
-
-
 
 (* Eliom references *)
-let username = Eliom_reference.eref ~scope:Eliom_common.default_session_scope None
+let userid = Eliom_reference.eref ~scope:Eliom_common.default_session_scope None
 
-let wrong_pwd = Eliom_reference.eref ~scope:Eliom_common.request_scope false
-
-
-
-(* Page widgets: *)
-let disconnect_box () =
-  post_form disconnection_service
-    (fun _ -> [fieldset
-		  [string_input
-                      ~input_type:`Submit ~value:"Log out" ()]]) ()
-
-let connection_box () =
-  lwt u = Eliom_reference.get username in
-  lwt wp = Eliom_reference.get wrong_pwd in
+let subscription_options () =
+  lwt u = Eliom_reference.get userid in
   Lwt.return
     (match u with
-      | Some s -> div [p [pcdata "You are connected as "; pcdata s; ];
-                       disconnect_box () ]
+      | Some s -> div [p [pcdata "You are connected as "; pcdata s; ]]
       | None ->
+
+        let get_auth_div heading uri = 
+            div ([
+                h2 heading;
+                table ~a:[a_width (`Percent 100); 
+                          a_class (["table";"table-bordered"])]
+
+                (tr
+                  (td [
+                   string_input 
+                    ~a:[a_onclick ("window.location.href='"^uri^"'")]
+                    ~input_type:`Submit ~value:"Facebook" ()
+                  ])
+                )
+                ])
+
         let l =
-          [post_form ~service:connection_service
-            (fun (name1, name2) ->
-              [fieldset
-		  [label ~a:[a_for name1] [pcdata "login: "];
-                   string_input ~input_type:`Text ~name:name1 ();
-                   br ();
-                   label ~a:[a_for name2] [pcdata "password: "];
-                   string_input ~input_type:`Password ~name:name2 ();
-                   br ();
-                   string_input ~input_type:`Submit ~value:"Connect" ()
-                 ]]) ();
-             p [a new_user_form_service [pcdata "Create an account"] ()]]
+          [get_auth_div "Facebook" "www.facebook.com";]
         in
-        if wp
-        then div ((p [em [pcdata "Wrong user or password"]])::l)
-        else div l
+        else div ~a:[a_class (["container"])] l
     )
-
-let create_account_form () =
-  post_form ~service:account_confirmation_service
-    (fun (name1, name2) ->
-      [fieldset
-	  [label ~a:[a_for name1] [pcdata "login: "];
-           string_input ~input_type:`Text ~name:name1 ();
-           br ();
-           label ~a:[a_for name2] [pcdata "password: "];
-           string_input ~input_type:`Password ~name:name2 ();
-           br ();
-           string_input ~input_type:`Submit ~value:"Connect" ()
-         ]]) ()
-
-
-
 
 (* Registration of services *)
 let _ =
@@ -103,6 +60,7 @@ let _ =
                      cf;
                      user_links ()])));
 
+  (*
   Eliom_registration.Any.register
     ~service:user_service
     (fun name () ->
@@ -162,3 +120,5 @@ let _ =
                         pcdata " ";
                         a ~service:main_service [pcdata "No"] ()]
                     ])))
+
+                    *)
