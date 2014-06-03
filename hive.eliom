@@ -41,6 +41,7 @@ let subscription_options () =
                   ])
                 )
                 ])
+        in
 
         let l =
           [get_auth_div "Facebook" "www.facebook.com";]
