@@ -35,7 +35,8 @@ let subscription_options () =
                 table 
 		  ~a:[a_class (["table";"table-bordered"])]
                   (tr
-                    [(td [ string_input ~input_type:`Submit ~value:("Login using "^heading) ();] )]
+                    [(td [ string_input ~a:[a_class ["btn";"btn-block";"btn-success"]]
+			   ~input_type:`Submit ~value:("Login using "^heading) ();] )]
                   )
 		  [];
             ]
@@ -47,17 +48,19 @@ let subscription_options () =
         div ~a:[a_class (["container"])] l
     )
 
-let make_page body = 
-    Html5.F.(
-       html
-         (Eliom_tools.Html5.head
-            ~title:"{Hive}"
-            ~css:([
-                "/static/bootstrap/css/bootstrap.min.css";
-                "/static/bootstrap/css/bootstrap-responsive.min.css";
-                "/static/main.css"
-                ]))
-         (body body))
+let make_page body' = 
+(html
+     (head (title (pcdata "{Hive}"))
+        [css_link ~uri:(make_uri (Eliom_service.static_dir ())
+	        	  ["css";"main.css"]) ();
+         css_link ~uri:(make_uri (Eliom_service.static_dir ())
+	        	  ["css";"bootstrap";"css";"bootstrap.min.css"]) ();
+         css_link ~uri:(make_uri (Eliom_service.static_dir ())
+	        	  ["css";"bootstrap";"css";"bootstrap-responsive.min.css"]) ();
+	])
+     (body ((js_script ~uri:(make_uri (Eliom_service.static_dir ())                                                             
+	        	  ["css";"bootstrap";"js";"bootstrap.min.js"]) ())
+	    ::body')))
 
 (* Registration of services *)
 let _ =
@@ -65,67 +68,4 @@ let _ =
     ~service:main_service
     (fun () () ->
       lwt cf = subscription_options () in
-      Lwt.return make_page ([h1 [pcdata "Hello"]; cf]);
-
-  (*
-  Eliom_registration.Any.register
-    ~service:user_service
-    (fun name () ->
-      if List.exists (fun (n, _) -> n = name) !users
-      then begin
-        lwt cf = connection_box () in
-        Eliom_registration.Html5.send
-          (html (head (title (pcdata name)) [])
-             (body [h1 [pcdata name];
-                    cf;
-                    p [a ~service:main_service [pcdata "Home"] ()]]))
-      end
-      else
-        Eliom_registration.Html5.send
-          ~code:404
-          (html (head (title (pcdata "404")) [])
-             (body [h1 [pcdata "404"];
-                    p [pcdata "That page does not exist"]]))
-    );
-
-  Eliom_registration.Action.register
-    ~service:connection_service
-    (fun () (name, password) ->
-      if check_pwd name password
-      then Eliom_reference.set username (Some name)
-      else Eliom_reference.set wrong_pwd true);
-
-  Eliom_registration.Action.register
-    ~service:disconnection_service
-    (fun () () -> Eliom_state.discard ~scope:Eliom_common.default_session_scope ());
-
-  Eliom_registration.Html5.register
-    ~service:new_user_form_service
-    (fun () () ->
-      Lwt.return
-        (html (head (title (pcdata "")) [])
-              (body [h1 [pcdata "Create an account"];
-                     create_account_form ();
-                    ])));
-
-  Eliom_registration.Html5.register
-    ~service:account_confirmation_service
-    (fun () (name, pwd) ->
-      let create_account_service =
-        Eliom_registration.Action.register_coservice
-          ~fallback:main_service
-          ~get_params:Eliom_parameter.unit
-          ~timeout:60.
-          (fun () () ->
-            users := (name, pwd)::!users;
-            Lwt.return ())
-      in
-      Lwt.return
-        (html (head (title (pcdata "")) [])
-              (body [h1 [pcdata "Confirm account creation for "; pcdata name];
-                     p [a ~service:create_account_service [pcdata "Yes"] ();
-                        pcdata " ";
-                        a ~service:main_service [pcdata "No"] ()]
-                    ])))
-
-                    *)
+      Lwt.return (make_page [h1 [pcdata "Hello"]; cf]))
