@@ -46,7 +46,7 @@ let subscription_options () =
         let l =
           [get_auth_div "Facebook" "www.facebook.com";]
         in
-        else div ~a:[a_class (["container"])] l
+        div ~a:[a_class (["container"])] l
     )
 
 (* Registration of services *)
