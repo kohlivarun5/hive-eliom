@@ -4,6 +4,7 @@ open Eliom_parameter
 (* Services *)
 let main_service = Eliom_service.Http.service ~path:[""] ~get_params:unit ()
 
+(*
 let user_service =
   Eliom_service.Http.service
     ~path:["subscriptions"] ~get_params:unit ()
@@ -16,6 +17,7 @@ let oauth2_connection_service =
 
 let disconnection_service = Eliom_service.Http.post_coservice' ~post_params:unit ()
 
+*)
 
 (* Eliom references *)
 let userid = Eliom_reference.eref ~scope:Eliom_common.default_session_scope None
@@ -27,24 +29,20 @@ let subscription_options () =
       | Some s -> div [p [pcdata "You are connected as "; pcdata s; ]]
       | None ->
 
-        let get_auth_div heading uri = 
-            div ([
-                h2 heading;
-                table ~a:[a_width (`Percent 100); 
-                          a_class (["table";"table-bordered"])]
-
-                (tr
-                  (td [
-                   string_input 
-                    ~a:[a_onclick ("window.location.href='"^uri^"'")]
-                    ~input_type:`Submit ~value:"Facebook" ()
-                  ])
-                )
-                ])
+        let get_auth_div heading = 
+            div 
+	    [
+                table 
+		  ~a:[a_class (["table";"table-bordered"])]
+                  (tr
+                    [(td [ string_input ~input_type:`Submit ~value:("Login using "^heading) ();] )]
+                  )
+		  [];
+            ]
         in
 
         let l =
-          [get_auth_div "Facebook" "www.facebook.com";]
+          [(get_auth_div "Facebook")]
         in
         div ~a:[a_class (["container"])] l
     )
@@ -54,12 +52,11 @@ let _ =
   Eliom_registration.Html5.register
     ~service:main_service
     (fun () () ->
-      lwt cf = connection_box () in
+      lwt cf = subscription_options () in
       Lwt.return
         (html (head (title (pcdata "")) [])
               (body [h1 [pcdata "Hello"];
-                     cf;
-                     user_links ()])));
+                     cf])));
 
   (*
   Eliom_registration.Any.register
