@@ -3,7 +3,8 @@ open Eliom_parameter
 
 (* Services *)
 let main_service = Eliom_service.Http.service ~path:[""] ~get_params:unit ()
-
+let oauth_service uri = Eliom_service.Http.external_service 
+                            ~prefix:"http://" ~path:uri ~get_params:unit () 
 (*
 let user_service =
   Eliom_service.Http.service
@@ -29,21 +30,24 @@ let subscription_options () =
       | Some s -> div [p [pcdata "You are connected as "; pcdata s; ]]
       | None ->
 
-        let get_auth_div heading = 
-            div 
-	    [
-                table 
-		  ~a:[a_class (["table";"table-bordered"])]
-                  (tr
-                    [(td [ string_input ~a:[a_class ["btn";"btn-block";"btn-success"]]
-			   ~input_type:`Submit ~value:("Login using "^heading) ();] )]
-                  )
-		  [];
-            ]
-        in
+        let get_auth_div heading uri =
+        (div ~a:[a_class (["span4"])]
+        [
+          table ~a:[a_class (["table";"table-bordered"])]
+          (tr
+            [(td 
+              [
+                (a ~service:(oauth_service uri) 
+                  [(string_input ~a:[a_class ["btn";"btn-block";"btn-success"]]
+                    ~input_type:`Submit ~value:("Login using "^heading) ();)] ())
+              ]
+            )]
+          )
+          [];
+        ]) in
 
         let l =
-          [(get_auth_div "Facebook")]
+          [(get_auth_div "Facebook" ["facebook.com"])]
         in
         div ~a:[a_class (["container"])] l
     )
@@ -52,27 +56,27 @@ let make_page body' =
 (html
      (head (title (pcdata "{Hive}"))
         [css_link ~uri:(make_uri (Eliom_service.static_dir ())
-	        	  ["css";"main.css"]) ();
+                  ["css";"main.css"]) ();
          css_link ~uri:(make_uri (Eliom_service.static_dir ())
-	        	  ["css";"bootstrap";"css";"bootstrap.min.css"]) ();
+                  ["css";"bootstrap";"css";"bootstrap.min.css"]) ();
          css_link ~uri:(make_uri (Eliom_service.static_dir ())
-	        	  ["css";"bootstrap";"css";"bootstrap-responsive.min.css"]) ();
-	])
+                  ["css";"bootstrap";"css";"bootstrap-responsive.min.css"]) ();
+    ])
      (body ~a:[a_style "background-color:#F1ECDE"]
-	   ((div ~a:[a_class ["navbar";"navbar-inverse";"navbar-fixed-top"]]
-	     [div ~a:[a_class ["navbar-inner"]]
-	      [div ~a:[a_class ["container"]]
-	       [
-	        (p ~a:[a_style "padding-right:1cm"; a_class ["brand"]]
-		   [(b [pcdata "{Hive}"]); (i [pcdata " : Your social hub!"]);]);
-	        (div [p ~a:[a_class ["brand";"navbar-form";"right"]] 
-	                [pcdata "Subscriptions"]]);
-	        (div [p [pcdata "Submit"]])
+       ((div ~a:[a_class ["navbar";"navbar-inverse";"navbar-fixed-top"]]
+         [div ~a:[a_class ["navbar-inner"]]
+          [div ~a:[a_class ["container"]]
+           [
+            (p ~a:[a_style "padding-right:1cm"; a_class ["brand"]]
+           [(b [pcdata "{Hive}"]); (i [pcdata " : Your social hub!"]);]);
+            (div [p ~a:[a_class ["brand";"navbar-form";"right"]] 
+                    [pcdata "Subscriptions"]]);
+            (div [p [pcdata "Submit"]])
                ]
-	      ]]) ::
-	    (js_script ~uri:(make_uri (Eliom_service.static_dir ())                                                             
-	        	  ["css";"bootstrap";"js";"bootstrap.min.js"]) ())
-	    ::body')))
+          ]]) ::
+        (js_script ~uri:(make_uri (Eliom_service.static_dir ())
+                  ["css";"bootstrap";"js";"bootstrap.min.js"]) ())
+        ::body')))
 
 (* Registration of services *)
 let _ =
