@@ -30,21 +30,33 @@ let subscription_options () =
       | Some s -> div [p [pcdata "You are connected as "; pcdata s; ]]
       | None ->
 
+
         let get_auth_div heading uri =
-        (div ~a:[a_class (["span4"])]
-        [
-          table ~a:[a_class (["table";"table-bordered"])]
-          (tr
-            [(td 
-              [
-                (a ~service:(oauth_service uri) 
-                  [(string_input ~a:[a_class ["btn";"btn-block";"btn-success"]]
-                    ~input_type:`Submit ~value:("Login using "^heading) ();)] ())
-              ]
-            )]
-          )
-          [];
-        ]) in
+          (*
+            Client side code doesn't work yet !!
+
+          let client_uri = (make_string_uri ~service:(oauth_service uri) () ) in
+          let onclick = {{ fun ev -> 
+            Dom_html.window##location##href <- (Js.string %client_uri) }} in
+          *)
+
+          (div ~a:[a_class (["span4"])]
+          [
+            table ~a:[a_class (["table";"table-bordered"])]
+            (tr
+              [(td 
+                [
+                  (a ~service:(oauth_service uri) ~a:[a_style "text-decoration:none;"]
+                    [(string_input ~a:[a_class ["btn";"btn-block";"btn-success"];
+                                      (* a_onclick onclick; *) ]
+                      ~input_type:`Submit ~value:("Login using "^heading) ();)] ())
+
+
+                ]
+              )]
+            )
+            [];
+          ]) in
 
         let l =
           [(get_auth_div "Facebook" ["facebook.com"])]
