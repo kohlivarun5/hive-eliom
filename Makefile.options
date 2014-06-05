@@ -1,17 +1,24 @@
 
 #----------------------------------------------------------------------
-#           SETTINGS FOR THE ELIOM PROJECT tuto
+#           SETTINGS FOR THE ELIOM PROJECT hive
 #----------------------------------------------------------------------
 
 PROJECT_NAME := hive
 
 # Source files for the server
-SERVER_FILES := $(wildcard *.eliomi *.eliom)
+SERVER_FILES := \
+			 $(wildcard util/*.eliomi util/*.eliom) \
+			 $(wildcard social/*.eliomi social/*.eliom) \
+			 $(wildcard *.eliomi *.eliom)
+
 # Source files for the client
-CLIENT_FILES := $(wildcard *.eliomi *.eliom)
+CLIENT_FILES := \
+			 $(wildcard util/*.eliomi util/*.eliom) \
+			 $(wildcard social/*.eliomi social/*.eliom) \
+			 $(wildcard hive.eliomi hive.eliom)
 
 # OCamlfind packages for the server
-SERVER_PACKAGES :=
+SERVER_PACKAGES := uri
 # OCamlfind packages for the client
 CLIENT_PACKAGES :=
 
@@ -23,7 +30,7 @@ PERSISTENT_DATA_BACKEND = dbm
 
 # Debug application (yes/no): Debugging info in compilation,
 # JavaScript, ocsigenserver
-DEBUG := no
+DEBUG := yes
 
 # User to run server with (make run.*)
 WWWUSER := www-data
