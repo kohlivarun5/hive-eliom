@@ -17,7 +17,7 @@ let subscription_options modules =
       | None ->
 
 
-        let get_auth_div (heading,oauth_uri) =
+        let get_auth_div (heading,access_token,oauth_uri) =
           (*
             Client side code doesn't work yet !!
 
@@ -36,7 +36,10 @@ let subscription_options modules =
                              a_style "text-decoration:none;"]
                     [(string_input ~a:[a_class ["btn";"btn-block";"btn-success"];
                                       (* a_onclick onclick; *) ]
-                      ~input_type:`Submit ~value:("Login using "^heading) ();)]
+                      ~input_type:`Submit 
+                      ~value:((if access_token = None 
+                               then "Login using "^heading
+                               else "Logged in using "^heading)) ();)]
                   )
                 ]
               )]
@@ -79,11 +82,15 @@ let _ =
   Eliom_registration.Html5.register
     ~service:main_service
     (fun () () ->
-     lwt cf = 
-      subscription_options 
+
+      lwt cf = 
+        subscription_options 
         (List.map (fun (name,oauth_uri,_,_) -> 
-                    (name, (oauth_uri (make_string_uri ~absolute:true ("code")))))
+                    (name, 
+                     (Db.get_from_db name),
+                     (oauth_uri (make_string_uri ~absolute:true ("code")))))
                 subscription_modules) in
+
      Lwt.return (Html.make_page 
                   [cf] 
                   (Eliom_service.static_dir ())))

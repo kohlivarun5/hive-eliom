@@ -18,7 +18,7 @@ CLIENT_FILES := \
 			 $(wildcard hive.eliomi hive.eliom)
 
 # OCamlfind packages for the server
-SERVER_PACKAGES := uri
+SERVER_PACKAGES := uri dbm cohttp.lwt facebook-sdk
 # OCamlfind packages for the client
 CLIENT_PACKAGES :=
 
