@@ -49,28 +49,39 @@ let subscription_options modules =
     )
 
 let subscription_modules = [
-  (Facebook.name, Facebook.oauth_uri, Facebook.oauth_callback_svc);
+  (Facebook.name, Facebook.oauth_uri, Facebook.oauth_callback_svc,Facebook.authorize);
 ]
+
+let sum a b = a + b ;;
 
 
 (* Registration of services *)
 let _ =
   let _ = List.map 
-    (fun (_,_,oauth_callback_svc) -> 
+    (fun (_,_,oauth_callback_svc,authorize) -> 
       Eliom_registration.Html5.register
       ~service:oauth_callback_svc
       (fun (code) () ->
-      Lwt.return (
-      Html.make_page 
-                  [pcdata code] 
-                  (Eliom_service.static_dir ())))) subscription_modules in
+      let auth_result = 
+            authorize 
+            (make_string_uri ~absolute:true ("code"))
+            code in
+      Lwt.bind 
+        auth_result 
+          (fun auth_result ->
+            Lwt.return (Html.make_page 
+                  [pcdata auth_result]
+                  (Eliom_service.static_dir ())
+                 )
+          )
+      )) subscription_modules in
 
   Eliom_registration.Html5.register
     ~service:main_service
     (fun () () ->
      lwt cf = 
       subscription_options 
-        (List.map (fun (name,oauth_uri,_) -> 
+        (List.map (fun (name,oauth_uri,_,_) -> 
                     (name, (oauth_uri (make_string_uri ~absolute:true ("code")))))
                 subscription_modules) in
      Lwt.return (Html.make_page 
