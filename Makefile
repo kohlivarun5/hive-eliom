@@ -12,7 +12,7 @@ include Makefile.options
 ##			      Internals
 
 ## Required binaries
-ELIOMC            := eliomc -type_conv
+ELIOMC            := eliomc 
 ELIOMOPT          := eliomopt
 JS_OF_ELIOM       := js_of_eliom
 ELIOMDEP          := eliomdep 
@@ -219,7 +219,7 @@ include .depend
 	cat $^ > $@
 
 $(DEPSDIR)/%.server: % | $(DEPSDIR)
-	$(ELIOMDEP) -server -type_conv $(SERVER_INC) $< > $@
+	$(ELIOMDEP) -server  $(SERVER_INC) $< > $@
 
 $(DEPSDIR)/%.client: % | $(DEPSDIR)
 	$(ELIOMDEP) -client $(CLIENT_INC) $< > $@
