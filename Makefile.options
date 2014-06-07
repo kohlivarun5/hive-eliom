@@ -7,15 +7,11 @@ PROJECT_NAME := hive
 
 # Source files for the server
 SERVER_FILES := \
-			 $(wildcard util/*.eliomi util/*.eliom) \
-			 $(wildcard social/*.eliomi social/*.eliom) \
 			 $(wildcard *.eliomi *.eliom)
 
 # Source files for the client
 CLIENT_FILES := \
-			 $(wildcard util/*.eliomi util/*.eliom) \
-			 $(wildcard social/*.eliomi social/*.eliom) \
-			 $(wildcard hive.eliomi hive.eliom)
+			 $(wildcard *.eliomi *.eliom)
 
 # OCamlfind packages for the server
 SERVER_PACKAGES := uri dbm facebook
