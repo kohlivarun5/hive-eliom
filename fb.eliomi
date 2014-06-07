@@ -1,7 +1,5 @@
   val name : string
-  val client_id : string
-  val client_secret : string
-  val callback_path : string list
+
   val oauth_callback_svc :
     (string, unit,
      [> `Attached of
@@ -10,6 +8,8 @@
      unit, [< Eliom_service.registrable > `Registrable ],
      [> Eliom_service.http_service ])
     Eliom_service.service
+
+
   val oauth_uri :
     (service:(string, unit,
               [> `Attached of
@@ -22,6 +22,8 @@
              Eliom_service.service ->
      string) ->
     string
+
+
   val authorize :
     (service:(string, unit,
               [> `Attached of
@@ -34,3 +36,6 @@
              Eliom_service.service ->
      string) ->
     string -> string Lwt.t
+
+  type item_info = { poster : string; text : string option; }
+  val get_latest_items : string -> item_info list Lwt.t

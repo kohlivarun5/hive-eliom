@@ -12,8 +12,8 @@ include Makefile.options
 ##			      Internals
 
 ## Required binaries
-ELIOMC            := eliomc 
-ELIOMOPT          := eliomopt
+ELIOMC            := eliomc -type_conv
+ELIOMOPT          := eliomopt -type_conv
 JS_OF_ELIOM       := js_of_eliom
 ELIOMDEP          := eliomdep 
 OCSIGENSERVER     := ocsigenserver
@@ -219,7 +219,7 @@ include .depend
 	cat $^ > $@
 
 $(DEPSDIR)/%.server: % | $(DEPSDIR)
-	$(ELIOMDEP) -server  $(SERVER_INC) $< > $@
+	$(ELIOMDEP) -server -type_conv  $(SERVER_INC) $< > $@
 
 $(DEPSDIR)/%.client: % | $(DEPSDIR)
 	$(ELIOMDEP) -client $(CLIENT_INC) $< > $@
@@ -231,6 +231,7 @@ $(DEPSDIR):
 ## Clean up
 
 clean:
+	-rm -rf ${DEPSDIR}
 	-rm -f *.cm[ioax] *.cmxa *.cmxs *.o *.a *.annot
 	-rm -f *.type_mli
 	-rm -f ${PROJECT_NAME}.js

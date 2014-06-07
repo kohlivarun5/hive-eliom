@@ -1,7 +1,6 @@
-#require facebook;;
-
-
 open Lwt
+open Facebook
+open Endpoints
 
 let name                = "Facebook"
 let client_id      = "679802582055154"
@@ -38,13 +37,12 @@ let authorize uri_creator code =
           access_token
         ))
 
-(*
-module API = Api.S
+module API = Api.S(Request_cohttp.S)
 module R = Core.Result
 
 type item_info = {
   poster : string;
-  text   : string;
+  text   : string option;
 }
 
 let get_latest_items access_token = 
@@ -52,7 +50,7 @@ let get_latest_items access_token =
   let open Endpoints.User.Home.ReadResponse in
   let open Endpoints.User.Home.Post in
   let open Endpoints.User.Home.Profile in
-  let request = access_token |> Auth.Token.of_string |> Request.S.create in
+  let request = access_token |> Auth.Token.of_string |> Request_cohttp.S.create in
 
   let rec format_response items response =
     match response with
@@ -82,4 +80,4 @@ let get_latest_items access_token =
     | R.Error _ -> 
       print_endline "An unspecified error occurred.";
       Lwt.return_unit
-    *)*)
+      *)

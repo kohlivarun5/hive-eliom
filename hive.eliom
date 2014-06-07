@@ -52,11 +52,8 @@ let subscription_options modules =
     )
 
 let subscription_modules = [
-  (Facebook.name, Facebook.oauth_uri, Facebook.oauth_callback_svc,Facebook.authorize);
+  (Fb.name, Fb.oauth_uri, Fb.oauth_callback_svc,Fb.authorize);
 ]
-
-let sum a b = a + b ;;
-
 
 (* Registration of services *)
 let _ =
