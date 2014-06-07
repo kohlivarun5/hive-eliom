@@ -14,10 +14,11 @@ include Makefile.options
 ## Required binaries
 ELIOMC            := eliomc -type_conv
 ELIOMOPT          := eliomopt -type_conv
-JS_OF_ELIOM       := js_of_eliom
+JS_OF_ELIOM       := js_of_eliom -type_conv
 ELIOMDEP          := eliomdep 
-OCSIGENSERVER     := ocsigenserver
-OCSIGENSERVER.OPT := ocsigenserver.opt
+OCSIGENSERVER     := ocsigenserver 
+OCSIGENSERVER.OPT := ocsigenserver.opt 
+
 
 ## Where to put intermediate object files.
 ## - ELIOM_{SERVER,CLIENT}_DIR must be distinct
@@ -103,7 +104,7 @@ run.opt:
 
 # Use `eliomdep -sort' only in OCaml>4
 ifeq ($(shell ocamlc -version|cut -c1),4)
-eliomdep=$(shell $(ELIOMDEP) $(1) -sort $(2) $(filter %.eliom %.ml,$(3))))
+eliomdep=$(shell $(ELIOMDEP) $(1) -type_conv -sort $(2) $(filter %.eliom %.ml,$(3))))
 else
 eliomdep=$(3)
 endif
@@ -159,11 +160,11 @@ ${ELIOM_TYPE_DIR}/%.type_mli: %.eliom
 
 $(TEST_PREFIX)$(LIBDIR)/$(PROJECT_NAME).cma: $(call objs,$(ELIOM_SERVER_DIR),cmo,$(SERVER_FILES)) | $(TEST_PREFIX)$(LIBDIR)
 	${ELIOMC} -a -o $@ $(GENERATE_DEBUG) \
-          $(call depsort,$(ELIOM_SERVER_DIR),cmo,-server,$(SERVER_INC),$(SERVER_FILES))
+          $(call depsort,$(ELIOM_SERVER_DIR),cmo,-server -type_conv ,$(SERVER_INC),$(SERVER_FILES))
 
 $(TEST_PREFIX)$(LIBDIR)/$(PROJECT_NAME).cmxa: $(call objs,$(ELIOM_SERVER_DIR),cmx,$(SERVER_FILES)) | $(TEST_PREFIX)$(LIBDIR)
 	${ELIOMOPT} -a -o $@ $(GENERATE_DEBUG) \
-          $(call depsort,$(ELIOM_SERVER_DIR),cmx,-server,$(SERVER_INC),$(SERVER_FILES))
+          $(call depsort,$(ELIOM_SERVER_DIR),cmx,-server  -type_conv ,$(SERVER_INC),$(SERVER_FILES))
 
 %.cmxs: %.cmxa
 	$(ELIOMOPT) -shared -linkall -o $@ $(GENERATE_DEBUG) $<
@@ -222,7 +223,7 @@ $(DEPSDIR)/%.server: % | $(DEPSDIR)
 	$(ELIOMDEP) -server -type_conv  $(SERVER_INC) $< > $@
 
 $(DEPSDIR)/%.client: % | $(DEPSDIR)
-	$(ELIOMDEP) -client $(CLIENT_INC) $< > $@
+	$(ELIOMDEP) -client -type_conv $(CLIENT_INC) $< > $@
 
 $(DEPSDIR):
 	mkdir $@

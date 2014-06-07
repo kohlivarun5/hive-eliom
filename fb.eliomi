@@ -37,5 +37,4 @@
      string) ->
     string -> string Lwt.t
 
-  type item_info = { poster : string; text : string option; }
-  val get_latest_items : string -> item_info list Lwt.t
+  val get_latest_items : string -> Core_types.item_info list Lwt.t

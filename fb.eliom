@@ -37,16 +37,19 @@ let authorize uri_creator code =
           access_token
         ))
 
+
+let make_large_picture_uri uri = 
+  match uri with 
+  | None -> None
+  | Some uri -> Some (
+  let string_url = (Uri.to_string uri) in
+  let big_url = Str.global_replace (Str.regexp "_s.") "_n." string_url in
+  Uri.of_string big_url)
+
 module API = Api.S(Request_cohttp.S)
 module R = Core.Result
 
-type item_info = {
-  poster : string;
-  text   : string option;
-}
-
 let get_latest_items access_token = 
-  
   let open Endpoints.User.Home.ReadResponse in
   let open Endpoints.User.Home.Post in
   let open Endpoints.User.Home.Profile in
@@ -57,19 +60,22 @@ let get_latest_items access_token =
     | R.Ok paged -> 
         (let response_items = 
            List.map 
-             (fun post -> {poster=post.from.name;text=post.message})
+             (fun post -> 
+             {
+              Core_types.poster=post.from.name;
+              text=post.message;
+              image=(make_large_picture_uri post.picture)
+             })
              (API.(paged.response.data)) in
          let items = List.rev_append items response_items in
-         match (API.(paged.next)) with
-         | Some more -> Lwt.bind (more ()) (format_response items)
-         | None -> Lwt.return items
+         match ((List.length items) > 10 ), (API.(paged.next)) with
+         | true,_ | _, None -> Lwt.return items
+         | _,Some more -> Lwt.bind (more ()) (format_response items)
         )
 
     | _ -> Lwt.return items
   in
-
   ((API.User.Home.read request) >>= (format_response []))
-
     (*
     | R.Error (`Conversion_error e) -> Lwt.return []
       let buf = Buffer.create 0 in

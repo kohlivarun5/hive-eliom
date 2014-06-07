@@ -1,3 +1,4 @@
+open Lwt
 open Eliom_content.Html5.D
 open Eliom_parameter
 
@@ -14,51 +15,17 @@ let subscription_options modules =
   Lwt.return
     (match u with
       | Some s -> div [p [pcdata "You are connected as "; pcdata s; ]]
-      | None ->
-
-
-        let get_auth_div (heading,access_token,oauth_uri) =
-          (*
-            Client side code doesn't work yet !!
-
-          let client_uri = (make_string_uri ~service:(oauth_uri uri) () ) in
-          let onclick = {{ fun ev -> 
-            Dom_html.window##location##href <- (Js.string %client_uri) }} in
-          *)
-
-          (div ~a:[a_class (["span4"])]
-          [
-            table ~a:[a_class (["table";"table-bordered"])]
-            (tr
-              [(td 
-                [
-                  (Raw.a ~a:[a_href (Raw.uri_of_string oauth_uri);
-                             a_style "text-decoration:none;"]
-                    [(string_input ~a:[a_class ["btn";"btn-block";"btn-success"];
-                                      (* a_onclick onclick; *) ]
-                      ~input_type:`Submit 
-                      ~value:((if access_token = None 
-                               then "Login using "^heading
-                               else "Logged in using "^heading)) ();)]
-                  )
-                ]
-              )]
-            )
-            [];
-          ]) in
-
-        let l = List.map get_auth_div modules in
-        div ~a:[a_class (["container"])] l
+      | None -> Html.create_subscriptions modules
     )
 
 let subscription_modules = [
-  (Fb.name, Fb.oauth_uri, Fb.oauth_callback_svc,Fb.authorize);
+  (Fb.name, Fb.oauth_uri, Fb.oauth_callback_svc,Fb.authorize,Fb.get_latest_items);
 ]
 
 (* Registration of services *)
 let _ =
   let _ = List.map 
-    (fun (_,_,oauth_callback_svc,authorize) -> 
+    (fun (name,_,oauth_callback_svc,authorize,item_getter) -> 
       Eliom_registration.Html5.register
       ~service:oauth_callback_svc
       (fun (code) () ->
@@ -66,15 +33,16 @@ let _ =
             authorize 
             (make_string_uri ~absolute:true ("code"))
             code in
-      Lwt.bind 
-        auth_result 
-          (fun auth_result ->
-            Lwt.return (Html.make_page 
-                  [pcdata auth_result]
-                  (Eliom_service.static_dir ())
-                 )
-          )
-      )) subscription_modules in
+      auth_result >>= (fun auth_result ->
+      let items = item_getter auth_result in
+      items >>= (fun items ->
+      Lwt.return 
+      (Html.make_page 
+        ~message:("Logged in to "^name^" !")
+        [Html.create_items items]
+        (Eliom_service.static_dir ())
+      )))))
+      subscription_modules in
 
   Eliom_registration.Html5.register
     ~service:main_service
@@ -82,7 +50,7 @@ let _ =
 
       lwt cf = 
         subscription_options 
-        (List.map (fun (name,oauth_uri,_,_) -> 
+        (List.map (fun (name,oauth_uri,_,_,_) -> 
                     (name, 
                      (Db.get_from_db name),
                      (oauth_uri (make_string_uri ~absolute:true ("code")))))
